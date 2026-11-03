@@ -54,6 +54,22 @@ only `MathServices.class`, so no extra dependencies need to be bundled.
 The `square(Integer)` signature allows Lambda to deserialize the numeric value
 as the handler's first parameter.
 
+### Evidence
+
+The AWS steps were run from Windows PowerShell with AWS CLI v2 against an AWS
+Academy Learner Lab account (`us-east-1`), using `LabRole` as the execution
+role. Each command is shown in the screenshot together with its output.
+
+Function `square` created with the `java25` runtime, the `LabRole` role and the
+`co.edu.escuelaing.services.MathServices::square` handler:
+
+![Lambda function](docs/images/04-lambda-function.png)
+
+Invocation with the plain payload `5` (the `testSquare` event) returns `25`;
+`14` returns `196`:
+
+![Lambda test](docs/images/05-lambda-test.png)
+
 ## Expose the function through API Gateway
 
 1. Create a regional **REST** API named `mathServices`.
@@ -81,22 +97,41 @@ If `value` is omitted, the mapping does not produce a valid integer and the
 invocation should be treated as invalid input. Delete the Lambda function and
 the API after completing the workshop to avoid unnecessary charges.
 
-## AWS console evidence
+### Evidence
 
-The AWS console steps cannot be captured from the command line. Add the
-following screenshots to `docs/images/` and reference them in the sections
-above to complete the lab report:
+Regional REST API `mathServices` with a `GET` method on `/` and the optional
+`method.request.querystring.value` parameter in **Method Request**:
 
-| File | What it shows |
-|------|---------------|
-| `04-lambda-function.png` | `square` function created with the Java 25 runtime and the handler configured |
-| `05-lambda-test.png` | Test event `5` returning `25` |
-| `06-apigw-method-request.png` | `value` query string parameter in **Method Request** |
-| `07-apigw-mapping-template.png` | Mapping template `$input.params("value")` |
-| `08-apigw-test.png` | API Gateway test with `value=14` returning `196` |
-| `09-apigw-deploy-stage.png` | API deployed to the `Beta` stage |
-| `10-browser-result.png` | Browser calling the invoke URL with `?value=14` |
-| `11-cleanup.png` | Lambda function and API deleted |
+![Method Request](docs/images/06-apigw-method-request.png)
+
+**Integration Request** of type `AWS` (Lambda, non-proxy) mapping
+`integration.request.querystring.value` from
+`method.request.querystring.value`, with the `application/json` mapping
+template `$input.params("value")`:
+
+![Integration Request and mapping template](docs/images/07-apigw-mapping-template.png)
+
+Method test: `value=14` returns `196`, `value=5` returns `25`, and calling it
+without `value` makes Lambda report a JSON parsing error, as the workshop
+expects:
+
+![API Gateway test](docs/images/08-apigw-test.png)
+
+Deployment to the `Beta` stage and call to the public invoke URL from
+PowerShell (`value=14` returns `196`, `value=7` returns `49`):
+
+![Deploy to Beta](docs/images/09-apigw-deploy-stage.png)
+
+Same invoke URL opened in Microsoft Edge:
+
+![Browser result](docs/images/10-browser-result.png)
+
+## Cleanup
+
+The API and the Lambda function were deleted after the workshop. The listings
+come back empty and the invoke URL no longer returns a result:
+
+![Cleanup](docs/images/11-cleanup.png)
 
 ## Project structure
 
